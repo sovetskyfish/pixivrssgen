@@ -57,6 +57,7 @@ namespace PixivRssGen
                     items.Add(syndicationItem);
                 }
                 feed.Items = items;
+                Console.WriteLine($"提供了{items.Count}条关注动态");
                 return new Rss20FeedFormatter(feed);
             }
 
@@ -80,6 +81,7 @@ namespace PixivRssGen
                     items.Add(syndicationItem);
                 }
                 feed.Items = items;
+                Console.WriteLine($"提供了{items.Count}条推荐");
                 return new Rss20FeedFormatter(feed);
             }
         }
