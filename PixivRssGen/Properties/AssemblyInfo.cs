@@ -6,11 +6,11 @@ using System.Runtime.InteropServices;
 // 控制。更改这些特性值可修改
 // 与程序集关联的信息。
 [assembly: AssemblyTitle("PixivRssGen")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("运行在本机的Pixiv RSS源")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("Fish Software")]
 [assembly: AssemblyProduct("PixivRssGen")]
-[assembly: AssemblyCopyright("Copyright ©  2020")]
+[assembly: AssemblyCopyright("自由软件")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
