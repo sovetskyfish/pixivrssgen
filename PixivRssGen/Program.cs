@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
+using System.Net.Sockets;
 using System.ServiceModel;
 using System.ServiceModel.Syndication;
 using System.ServiceModel.Web;
@@ -39,13 +41,13 @@ namespace PixivRssGen
 
             public async Task<Rss20FeedFormatter> Following()
             {
-                SyndicationFeed feed = new SyndicationFeed("Pixiv关注动态", "此RSS Feed展示用户关注的画师的新作品", new Uri("http://localhost:80/PixivRSS/Following"));
+                SyndicationFeed feed = new SyndicationFeed("Pixiv关注动态", "此RSS Feed展示用户关注的画师的新作品", new Uri($"http://{localIP}:80/PixivRSS/Following"));
                 List<SyndicationItem> items = new List<SyndicationItem>();
                 //为RSS源添加内容
                 var recommendation = await new PixivCS.PixivAppAPI(api).GetIllustFollowAsync();
                 foreach (var item in recommendation.Illusts)
                 {
-                    Uri validImage = new Uri($"http://localhost:80/PixivRSS/Image/{new Uri("https://i.pximg.net/").MakeRelativeUri(item.ImageUrls.Medium)}");
+                    Uri validImage = new Uri($"http://{localIP}:80/PixivRSS/Image/{new Uri("https://i.pximg.net/").MakeRelativeUri(item.ImageUrls.Medium)}");
                     SyndicationItem syndicationItem = new SyndicationItem
                         (
                             item.Title,
@@ -63,13 +65,13 @@ namespace PixivRssGen
 
             public async Task<Rss20FeedFormatter> Recommendation()
             {
-                SyndicationFeed feed = new SyndicationFeed("Pixiv推荐", "此RSS Feed展示针对用户的Pixiv图片推荐", new Uri("http://localhost:80/PixivRSS/Recommendation"));
+                SyndicationFeed feed = new SyndicationFeed("Pixiv推荐", "此RSS Feed展示针对用户的Pixiv图片推荐", new Uri($"http://{localIP}:80/PixivRSS/Recommendation"));
                 List<SyndicationItem> items = new List<SyndicationItem>();
                 //为RSS源添加内容
                 var recommendation = await new PixivCS.PixivAppAPI(api).GetIllustRecommendedAsync();
                 foreach (var item in recommendation.Illusts)
                 {
-                    Uri validImage = new Uri($"http://localhost:80/PixivRSS/Image/{new Uri("https://i.pximg.net/").MakeRelativeUri(item.ImageUrls.Medium)}");
+                    Uri validImage = new Uri($"http://{localIP}:80/PixivRSS/Image/{new Uri("https://i.pximg.net/").MakeRelativeUri(item.ImageUrls.Medium)}");
                     SyndicationItem syndicationItem = new SyndicationItem
                         (
                             item.Title,
@@ -87,6 +89,7 @@ namespace PixivRssGen
         }
 
         static PixivCS.PixivBaseAPI api = new PixivCS.PixivBaseAPI();
+        static string localIP = null;
 
         public class Host
         {
@@ -132,6 +135,21 @@ namespace PixivRssGen
                     return;
                 }
                 Console.WriteLine($"登录成功；用于提供服务的Pixiv用户名为：{authRes.Response.User.Account}");
+                var host = Dns.GetHostEntry(Dns.GetHostName());
+                foreach (var ip in host.AddressList)
+                {
+                    if (ip.AddressFamily == AddressFamily.InterNetwork)
+                    {
+                        localIP = ip.ToString();
+                    }
+                }
+                if (localIP == null)
+                {
+                    Console.WriteLine("本机没有有效地址，程序即将退出");
+                    Console.ReadLine();
+                    return;
+                }
+                Console.WriteLine($"本机的IPv4地址为{localIP}");
                 Uri baseAddress = new Uri("http://localhost:80/PixivRSS");
                 WebServiceHost svcHost = new WebServiceHost(typeof(PixivRecommendationService), baseAddress);
                 try
